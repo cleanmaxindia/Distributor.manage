@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CleanMax Orders</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef6f6;--card:#fff;--ink:#12302f;--mut:#5f7d7c;--line:#d3e4e3;--pri:#0a7c78;--pri2:#e6f4f3;--bad:#c2410c;--ok:#15803d;--warn:#a16207;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1c1c;--card:#142a2a;--ink:#e3f1f0;--mut:#8fb0af;--line:#24413f;--pri:#3cc4bd;--pri2:#173836;--bad:#fb923c;--ok:#4ade80;--warn:#facc15}}
+:root[data-theme="dark"]{--bg:#0d1c1c;--card:#142a2a;--ink:#e3f1f0;--mut:#8fb0af;--line:#24413f;--pri:#3cc4bd;--pri2:#173836;--bad:#fb923c;--ok:#4ade80;--warn:#facc15}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 Manrope,system-ui,sans-serif}
+.w{max-width:900px;margin:0 auto;padding:16px}
+h1{font-size:22px;font-weight:800;margin:0}h2{font-size:16px;margin:0 0 10px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.top span{color:var(--mut);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media(min-width:640px){.stats{grid-template-columns:repeat(4,1fr)}}
+.st{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.st b{display:block;font-size:20px;font-weight:800}.st small{color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.g{grid-template-columns:1fr}}
+label{display:block;font-size:12px;color:var(--mut);font-weight:600}
+input,select,textarea{width:100%;margin-top:3px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.full{grid-column:1/-1}
+button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:10px 14px;background:var(--pri);color:#fff;cursor:pointer}
+button.alt{background:var(--pri2);color:var(--pri)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.bar>*{flex:1;min-width:120px;margin:0}
+.o{border-top:1px solid var(--line);padding:12px 0}
+.o:first-child{border-top:0}
+.r{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--pri2);color:var(--pri)}
+.tag.p{color:var(--warn)}.tag.u{color:var(--bad)}.tag.d{color:var(--ok)}
+.m{color:var(--mut);font-size:13px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.acts button{padding:6px 10px;font-size:13px}
+.empty{color:var(--mut);text-align:center;padding:20px}
+[data-tab]{display:none!important}
+body[data-t="orders"] [data-tab="orders"],body[data-t="add"] [data-tab="add"],body[data-t="stock"] [data-tab="stock"],body[data-t="rep"] [data-tab="rep"],body[data-t="team"] [data-tab="team"],body[data-t="da"] [data-tab="da"],body[data-t="dl"] [data-tab="dl"],body[data-t="dk"] [data-tab="dk"],body[data-t="dm"] [data-tab="dm"]{display:block!important}
+body[data-t="orders"] .stats[data-tab]{display:grid!important}
+body{padding-bottom:84px}
+input,select,textarea{font-size:16px;min-height:44px}
+button{min-height:44px}.acts button{min-height:40px;flex:1 1 auto}
+#nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:0 0 env(safe-area-inset-bottom,0px);z-index:5}
+#nav button{flex:1;background:transparent;color:var(--mut);border-radius:0;font-size:12px;min-height:56px;padding:6px 2px}
+#nav button.on{color:var(--pri);font-weight:800;box-shadow:inset 0 3px 0 var(--pri)}
+@media(max-width:480px){.w{padding:12px}.top{align-items:flex-start}.acts button{padding:8px 10px}}
+body:not(.founder) .fo{display:none!important}.pl{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.pl:first-child{border-top:0}
+#gbox[hidden]{display:none!important}
+body:not(.dist) .dn{display:none!important}body.dist .sf{display:none!important}
+#nav{overflow-x:auto}#nav button{flex:1 0 auto;font-size:11px;padding:6px 4px;white-space:nowrap}</style><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script></head><body data-t="orders"><div class="w" id="app" hidden>
+<div class="top"><div><h1>CleanMax Orders</h1><span id="sync">F&amp;S Industries · order &amp; sales tracker</span></div><div class="acts" style="margin:0"><button class="alt fo" id="csv">Export CSV</button><button class="alt" id="lout">Log out</button></div></div>
+<div class="stats" data-tab="orders">
+<div class="st"><small>Total sales</small><b id="s1">₹0</b></div>
+<div class="st"><small>Payment due</small><b id="s2">₹0</b></div>
+<div class="st"><small>Pending delivery</small><b id="s3">0</b></div>
+<div class="st"><small>Orders</small><b id="s4">0</b></div></div>
+
+<div class="card" data-tab="add"><h2 id="ft">Add order</h2>
+<div class="g">
+<label>Order type<select id="type"><option>Distributor</option><option>Shop</option><option>Commercial</option></select></label>
+<label>Date<input type="date" id="date"></label>
+<label>Customer / shop name<input id="name" placeholder="e.g. Sai Traders"></label>
+<label>Phone<input id="phone" type="tel" placeholder="+91"></label>
+<label>Product<select id="prodb"></select></label>
+<label>Size<select id="prod"></select></label>
+<label>Quantity<input id="qty" type="number" min="1" value="10"></label>
+<label>Price per unit (₹)<input id="price" type="number" min="0" placeholder="0"></label>
+<label>Amount paid (₹)<input id="paid" type="number" min="0" value="0"></label>
+<label>Delivery status<select id="dstat"><option>Pending</option><option>Dispatched</option><option>Delivered</option></select></label>
+<label class="full">Bill type<select id="btype"><option value="nongst">Non-GST bill</option><option value="gst">GST bill (tax invoice)</option></select></label>
+<div class="full g" id="gbox" hidden>
+<label>GST rate<select id="grate"><option value="0">0%</option><option value="5">5%</option><option value="18">18%</option><option value="40">40%</option></select></label>
+<label>Price entered is<select id="gincl"><option value="excl">Excluding GST</option><option value="incl">Including GST</option></select></label>
+<label>HSN code<input id="hsn" inputmode="numeric" placeholder="3402"></label>
+<label>Buyer GSTIN (if registered)<input id="gstin" autocapitalize="characters" style="text-transform:uppercase" placeholder="29ABCDE1234F1Z5"></label>
+<label class="full">State / place of supply<select id="pst"></select></label>
+<div class="full m" id="gprev"></div></div>
+<label>Place / address<input id="addr" placeholder="Town or address"></label>
+<label class="full">Notes<textarea id="note" rows="2"></textarea></label>
+<div class="full"><button id="save">Save order</button> <button class="alt" id="clr">Clear</button></div></div></div>
+
+<div class="card fo" data-tab="team"><h2>Team access</h2><div class="g"><label>Name<input id="tn"></label><label>Email<input id="tu" type="email" autocapitalize="none" autocomplete="off"></label><label class="full">Temporary password (at least 6 characters)<input id="tp" autocomplete="off"></label><label class="full">Role<select id="tr"><option value="staff">Staff</option><option value="distributor">Distributor</option></select></label><label>Phone (distributor)<input id="td" type="tel"></label><label>Area (distributor)<input id="ta"></label><label class="full">GST number (distributor, optional)<input id="tg" autocapitalize="characters"></label><div class="full"><button id="tbtn">Add login</button></div></div><div id="team" class="m" style="margin-top:10px"></div></div>
+
+<div class="card fo" data-tab="team" id="cbox"><h2>Company &amp; invoice details</h2><p class="m" style="margin:0 0 10px">These details are printed on every bill. Fill them once.</p><div class="g">
+<label class="full">Business name<input id="cn"></label>
+<label class="full">Address<textarea id="ca" rows="2"></textarea></label>
+<label>Your GSTIN<input id="cg" autocapitalize="characters" style="text-transform:uppercase" placeholder="29ABCDE1234F1Z5"></label>
+<label>State<select id="cs"></select></label>
+<label>Phone<input id="cp" type="tel"></label>
+<label>Email<input id="ce" type="email" autocapitalize="none"></label>
+<label>Bank name<input id="cb"></label>
+<label>Account number<input id="cac" inputmode="numeric"></label>
+<label>IFSC<input id="ci" autocapitalize="characters"></label>
+<label>Branch<input id="cbr"></label>
+<label class="full">Terms &amp; conditions<textarea id="ct" rows="2"></textarea></label>
+<div class="full"><button id="cbtn">Save company details</button></div></div></div>
+
+<div class="card" data-tab="stock"><h2>Products &amp; stock</h2><div id="plist"></div>
+<div class="g fo" style="margin-top:10px"><label>New product name<input id="pn" placeholder="e.g. Floor Cleaner"></label><label>Size<input id="ps" placeholder="e.g. 500ml, 1L, 5L"></label><label>Selling price (₹)<input id="pp" type="number" min="0"></label><div class="full"><button id="pbtn">Add product</button></div></div></div>
+
+<div class="card" data-tab="rep"><h2>Monthly sales report</h2>
+<div class="bar"><input type="month" id="mon"><button id="rbtn">Show report</button><button class="alt" id="rwa">Send to WhatsApp</button></div>
+<pre id="rout" class="m" style="white-space:pre-wrap;margin:0;font:inherit"></pre></div>
+
+<div class="card" data-tab="orders"><h2>Orders</h2>
+<div class="bar"><input id="q" placeholder="Search name or phone"><select id="ft1"><option value="">All types</option><option>Distributor</option><option>Shop</option><option>Commercial</option></select><select id="ft2"><option value="">All status</option><option>Pending</option><option>Dispatched</option><option>Delivered</option><option value="due">Payment due</option></select></div>
+<div id="list"></div></div><div class="card" data-tab="da"><h2>Add sale</h2><div class="g">
+<label>Date<input type="date" id="sd"></label>
+<label>Shop / customer name<input id="sn" placeholder="e.g. Sai Traders"></label>
+<label>Product<select id="sb"></select></label>
+<label>Size<select id="sp"></select></label>
+<label>Quantity sold<input id="sq" type="number" min="1" value="1"></label>
+<label class="full">Notes (optional)<textarea id="sno" rows="2"></textarea></label>
+<div class="full"><button id="sbtn">Save sale</button></div></div><p class="m" id="sleft" style="margin:10px 0 0"></p></div>
+
+<div class="card" data-tab="dl"><h2>My sales</h2>
+<div class="stats" style="grid-template-columns:repeat(3,1fr)"><div class="st"><small>Today</small><b id="ya">0</b></div><div class="st"><small>Last 7 days</small><b id="yb">0</b></div><div class="st"><small>This month</small><b id="yc">0</b></div></div>
+<div id="sl"></div></div>
+
+<div class="card" data-tab="dk"><h2>My stock</h2><div id="kl"></div></div>
+
+<div data-tab="dm" class="fo"><div class="card"><h2>Give stock to a distributor</h2><div class="g">
+<label>Distributor<select id="gd"></select></label>
+<label>Quantity (use minus to reduce)<input id="gq" type="number"></label>
+<label>Product<select id="gb"></select></label>
+<label>Size<select id="gs"></select></label>
+<div class="full"><button id="gbtn">Give stock</button></div></div></div>
+<div class="card"><h2>Distributors</h2><div id="dsum"></div><div id="dlist"></div></div></div>
+<nav id="nav"><button data-t="orders" class="sf on">Orders</button><button data-t="add" class="sf">+ New order</button><button data-t="stock" class="sf">Stock</button><button data-t="rep" class="sf">Reports</button><button data-t="dm" class="sf fo">Distributors</button><button data-t="team" class="sf fo">Team</button><button data-t="da" class="dn">Add sale</button><button data-t="dl" class="dn">My sales</button><button data-t="dk" class="dn">My stock</button></nav></div>
+<div class="w" id="lock"><div class="card"><h2>CleanMax Orders</h2><p id="lmsg" class="m">Loading...</p>
+<div id="lf" hidden><div class="g"><label id="lnw" class="full" hidden>Your name<input id="ln"></label><label class="full">Email<input id="lu" type="email" autocapitalize="none" autocomplete="username"></label><label class="full">Password<input id="lp" type="password" autocomplete="current-password"></label></div><p id="lerr" class="m" style="color:var(--bad)"></p><button id="lbtn">Log in</button></div>
+<button class="alt" id="lfp" hidden>Forgot password</button> <button class="alt" id="lre" hidden>Reload</button></div></div>
+<style>
+#vfab{position:fixed;right:16px;bottom:calc(64px + env(safe-area-inset-bottom,0px));width:54px;height:54px;border-radius:50%;border:0;background:#12162b;display:flex;align-items:center;justify-content:center;gap:3px;z-index:6;box-shadow:0 4px 14px rgba(0,0,0,.3);padding:0;cursor:pointer}
+#vfab i{display:block;width:4px;border-radius:2px;background:#fff}
+#vfab i:nth-child(1),#vfab i:nth-child(5){height:10px}#vfab i:nth-child(2),#vfab i:nth-child(4){height:18px}#vfab i:nth-child(3){height:26px}
+#app[hidden]~#vfab{display:none}
+#vov{position:fixed;inset:0;z-index:50;background:linear-gradient(180deg,#0a0c14 0%,#12162b 100%);color:#f4f5f8;display:flex;flex-direction:column;align-items:center;padding:env(safe-area-inset-top,0px) 20px calc(16px + env(safe-area-inset-bottom,0px));font-family:Manrope,system-ui,sans-serif}
+#vov[hidden]{display:none}
+#vx{align-self:flex-end;margin-top:12px;background:transparent;border:1px solid #39405f;color:#f4f5f8;border-radius:20px;padding:8px 16px;font-size:14px;cursor:pointer}
+#vstage{margin-top:6vh;display:flex;flex-direction:column;align-items:center;cursor:pointer;background:none;border:0;color:inherit;padding:10px}
+#vbars{display:flex;align-items:center;gap:14px;height:120px}
+.vb{width:14px;border-radius:7px;background:#f4f5f8;transform-origin:center}
+.vb:nth-child(1),.vb:nth-child(5){height:40px}.vb:nth-child(2),.vb:nth-child(4){height:70px}.vb:nth-child(3){height:112px}
+@keyframes vw{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1.05)}}
+#vov.l .vb{animation:vw .9s ease-in-out infinite}#vov.s .vb{animation:vw .6s ease-in-out infinite}
+.vb:nth-child(2){animation-delay:.12s!important}.vb:nth-child(3){animation-delay:.24s!important}.vb:nth-child(4){animation-delay:.36s!important}.vb:nth-child(5){animation-delay:.48s!important}
+@media (prefers-reduced-motion:reduce){#vov.l .vb,#vov.s .vb{animation:none}}
+#vt{font-weight:800;font-size:22px;margin-top:22px;letter-spacing:.5px}
+#vst{margin-top:8px;color:#9aa3c7;font-size:14px;min-height:20px}
+#vsay{margin-top:18px;color:#9aa3c7;font-size:15px;text-align:center;min-height:22px}
+#vans{margin-top:10px;font-size:18px;line-height:1.5;text-align:center;max-height:30vh;overflow:auto;max-width:520px}
+#vlg{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding-top:14px}
+#vlg button{background:transparent;border:1px solid #39405f;color:#f4f5f8;border-radius:18px;padding:9px 14px;font-size:15px;cursor:pointer}
+#vlg button.on{background:#f4f5f8;color:#12162b;border-color:#f4f5f8;font-weight:700}
+</style>
+<button id="vfab" aria-label="Voice assistant"><i></i><i></i><i></i><i></i><i></i></button>
+<div id="vov" hidden><button id="vx">Close</button>
+<button id="vstage" aria-label="Tap to speak"><div id="vbars"><span class="vb"></span><span class="vb"></span><span class="vb"></span><span class="vb"></span><span class="vb"></span></div><div id="vt">VOICE AI</div><div id="vst"></div></button>
+<div id="vsay"></div><div id="vans"></div>
+<div id="vlg"></div></div>
+<script>
+var firebaseConfig={apiKey:"AIzaSyD05LMfDLeqDmouDEJbSvN7BPTKqs0xFog",authDomain:"cleanmaxindia-41bee.firebaseapp.com",projectId:"cleanmaxindia-41bee",appId:"1:946706512148:web:0e918b9af251254a27aa01"};
+var DHSN="3402",DG=18,GSTRE=/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+var ST=[["01","Jammu & Kashmir"],["02","Himachal Pradesh"],["03","Punjab"],["04","Chandigarh"],["05","Uttarakhand"],["06","Haryana"],["07","Delhi"],["08","Rajasthan"],["09","Uttar Pradesh"],["10","Bihar"],["11","Sikkim"],["12","Arunachal Pradesh"],["13","Nagaland"],["14","Manipur"],["15","Mizoram"],["16","Tripura"],["17","Meghalaya"],["18","Assam"],["19","West Bengal"],["20","Jharkhand"],["21","Odisha"],["22","Chhattisgarh"],["23","Madhya Pradesh"],["24","Gujarat"],["26","Dadra & Nagar Haveli & Daman & Diu"],["27","Maharashtra"],["29","Karnataka"],["30","Goa"],["31","Lakshadweep"],["32","Kerala"],["33","Tamil Nadu"],["34","Puducherry"],["35","Andaman & Nicobar Islands"],["36","Telangana"],["37","Andhra Pradesh"],["38","Ladakh"]];
+var CO={name:"F&S Industries (CleanMax)",addr:"Mangalore, Karnataka 574222",gstin:"",st:"29",phone:"+918884469933",email:"cleanmaxindiasupport@gmail.com",bank:"",acno:"",ifsc:"",branch:"",terms:"Goods once sold will not be taken back or exchanged."};
+var K="cleanmax_orders_v1",D=[],E=null,$=function(i){return document.getElementById(i)};
+try{D=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){D=[]}
+var DB=null,migrated=false,K2="cleanmax_products_v1",PR=[],seeded=false;
+var DEF=[{id:"dishwash",name:"Dishwash Liquid 500ml",price:0,added:0,created:1},{id:"toilet",name:"Toilet Cleaner 500ml",price:0,added:0,created:2}];
+try{PR=JSON.parse(localStorage.getItem(K2)||"null")||JSON.parse(JSON.stringify(DEF))}catch(e){PR=JSON.parse(JSON.stringify(DEF))}
+function pput(p){if(DB)DB.collection("products").doc(p.id).set(p).catch(fail);else{var i=PR.findIndex(function(x){return x.id===p.id});if(i>=0)PR[i]=p;else PR.push(p);try{localStorage.setItem(K2,JSON.stringify(PR))}catch(e){}drawP()}}
+function prm(id){if(DB)DB.collection("products").doc(id).delete().catch(fail);else{PR=PR.filter(function(x){return x.id!==id});try{localStorage.setItem(K2,JSON.stringify(PR))}catch(e){}drawP()}}
+function stock(n){var s=0;PR.forEach(function(p){if(p.name===n)s+=p.added});D.forEach(function(o){if(o.prod===n)s-=o.qty});return s}
+function bs(p){if(p.base!==undefined)return{base:p.base,size:p.size||""};var m=/^(.*?)\s*(\d+(?:\.\d+)?\s*(?:ml|ltr|litre|l|kg|g))$/i.exec(p.name);return m?{base:m[1],size:m[2]}:{base:p.name,size:""}}
+function sizes(){var b=$("prodb").value,c=$("prod").value;$("prod").innerHTML=PR.filter(function(p){return bs(p).base===b}).map(function(p){return'<option value="'+esc(p.name)+'">'+esc(bs(p).size||"Standard")+'</option>'}).join("");if(c&&PR.some(function(p){return p.name===c&&bs(p).base===b}))$("prod").value=c}
+function fillProd(){var cb=$("prodb").value,B=[];PR.forEach(function(p){var b=bs(p).base;if(B.indexOf(b)<0)B.push(b)});$("prodb").innerHTML=B.map(function(b){return"<option>"+esc(b)+"</option>"}).join("");if(cb&&B.indexOf(cb)>=0)$("prodb").value=cb;sizes()}
+var GB=[];
+function drawP(){fillProd();fillPS("gb","gs");GB=[];PR.forEach(function(p){var b=bs(p).base;if(GB.indexOf(b)<0)GB.push(b)});
+$("plist").innerHTML=GB.length?GB.map(function(b,gi){return'<div class="o"><div class="r"><b>'+esc(b)+'</b><button class="alt fo" onclick="asz('+gi+')">+ Add size</button></div>'+PR.filter(function(p){return bs(p).base===b}).map(function(p){var k=stock(p.name);
+return'<div class="pl" style="flex-wrap:wrap"><div><b>'+esc(bs(p).size||"Standard")+'</b><div class="m">'+inr(p.price)+' &middot; '+k+' units &middot; HSN '+esc(p.hsn||DHSN)+' &middot; GST '+(p.gst!==undefined?p.gst:DG)+'% <span class="tag '+(k<=20?"u":"d")+'">'+(k<=0?"Out of stock":k<=20?"Low stock":"In stock")+'</span></div></div><div class="acts" style="margin:0"><button class="alt" onclick="stk(\''+p.id+'\')">Add stock</button><button class="alt fo" onclick="prc(\''+p.id+'\')">Set price</button><button class="alt fo" onclick="gsi(\''+p.id+'\')">GST info</button><button class="alt fo" onclick="prd(\''+p.id+'\')">Remove</button></div></div>'}).join("")+'</div>'}).join(""):'<div class="empty">No products yet. Add one below.</div>'}
+function mk(b,sz,pr){var n=(b+" "+sz).trim();if(PR.some(function(p){return p.name.toLowerCase()===n.toLowerCase()})){alert("This product and size already exist.");return false}
+pput({id:"p"+Date.now(),base:b,size:sz,name:n,price:+pr||0,added:0,created:Date.now()});return true}
+function asz(i){var b=GB[i],sz=prompt("New size for "+b+" (for example 1L or 5L):");if(!sz||!sz.trim())return;var pr=prompt("Selling price per unit (₹) for "+b+" "+sz.trim()+":","0");if(pr===null)return;mk(b,sz.trim(),pr)}
+function gp(id){return PR.find(function(x){return x.id===id})}
+function stk(id){var p=gp(id),v=prompt("Units to add to stock for "+p.name+" (use a minus number to reduce, e.g. -5 for damaged):");if(v===null)return;v=+v;if(!v)return;pput(Object.assign({},p,{added:p.added+v}))}
+function prc(id){var p=gp(id),v=prompt("Selling price per unit (₹) for "+p.name+":",p.price);if(v===null||isNaN(+v))return;pput(Object.assign({},p,{price:+v}))}
+function gsi(id){var p=gp(id),h=prompt("HSN code for "+p.name+":",p.hsn||DHSN);if(h===null)return;var r=prompt("GST rate % for "+p.name+" (0, 5, 18 or 40):",p.gst!==undefined?p.gst:DG);if(r===null||isNaN(+r))return;pput(Object.assign({},p,{hsn:h.trim(),gst:+r}))}
+function prd(id){var p=gp(id);if(confirm("Remove "+p.name+" from the product list? Past orders keep their records."))prm(id)}
+$("pbtn").onclick=function(){var n=$("pn").value.trim();if(!n){alert("Enter the product name.");return}
+if(mk(n,$("ps").value.trim(),$("pp").value)){$("pn").value="";$("ps").value="";$("pp").value=""}};
+$("prodb").onchange=function(){sizes();$("prod").onchange()};
+$("prod").onchange=function(){var p=PR.find(function(x){return x.name===$("prod").value});if(p&&p.price)$("price").value=p.price;if(p){$("hsn").value=p.hsn||DHSN;$("grate").value=String(p.gst!==undefined?p.gst:DG)}gprev()};
+function sv(){try{localStorage.setItem(K,JSON.stringify(D))}catch(e){}}
+function fail(e){alert("Could not save"+(e&&e.code==="permission-denied"?": you do not have permission for this action.":". Check your internet."))}
+function put(o){if(DB)DB.collection("orders").doc(String(o.id)).set(o).catch(fail);else{var i=D.findIndex(function(x){return x.id===o.id});if(i>=0)D[i]=o;else D.unshift(o);sv();draw()}}
+function rm(id){if(DB)DB.collection("orders").doc(String(id)).delete().catch(fail);else{D=D.filter(function(x){return x.id!==id});sv();draw()}}
+function inr(n){return"₹"+Math.round(n).toLocaleString("en-IN")}
+function tot(o){return calc(o).grand}
+function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+$("date").value=new Date().toISOString().slice(0,10);
+var F=["type","date","name","phone","prod","qty","price","paid","dstat","addr","note","btype","grate","gincl","hsn","gstin","pst"];
+function clr(){E=null;F.forEach(function(f){$(f).value=""});$("type").selectedIndex=0;$("prodb").selectedIndex=0;sizes();$("prod").selectedIndex=0;$("dstat").selectedIndex=0;$("qty").value=10;$("paid").value=0;$("date").value=new Date().toISOString().slice(0,10);$("ft").textContent="Add order";gdef()}
+$("clr").onclick=clr;
+$("save").onclick=function(){
+var o={};F.forEach(function(f){o[f]=$(f).value});
+if(!o.name.trim()){alert("Enter the customer or shop name.");return}
+o.qty=+o.qty||0;o.price=+o.price||0;o.paid=+o.paid||0;o.grate=+o.grate||0;
+if(o.btype==="gst"){o.gstin=(o.gstin||"").trim().toUpperCase();o.hsn=(o.hsn||"").trim()||DHSN;
+if(o.gstin&&!GSTRE.test(o.gstin)){alert("The buyer GSTIN looks wrong. It must be 15 characters, for example 29ABCDE1234F1Z5.");return}
+if(!o.pst){alert("Choose the state / place of supply.");return}}
+if(o.qty<1){alert("Quantity must be at least 1.");return}
+var av=stock(o.prod);if(E){var old=D.find(function(x){return x.id===E});if(old&&old.prod===o.prod)av+=old.qty}
+if(PR.some(function(p){return p.name===o.prod})&&o.qty>av&&!confirm("Only "+av+" in stock for "+o.prod+". Save this order anyway?"))return;
+if(E&&old&&old.invno){o.invno=old.invno;o.invbt=old.invbt}
+o.id=E||Date.now();put(o);clr();go("orders")};
+function edit(id){var o=D.find(function(x){return x.id===id});E=id;var q=PR.find(function(p){return p.name===o.prod});if(q){$("prodb").value=bs(q).base;sizes()}else{$("prod").innerHTML+="<option value=\""+esc(o.prod)+"\">"+esc(o.prod)+"</option>"}F.forEach(function(f){$(f).value=o[f]!==undefined?o[f]:DV()[f]});tgl();gprev();$("ft").textContent="Edit order";go("add")}
+function del(id){if(confirm("Delete this order?"))rm(id)}
+function nxt(id){var o=D.find(function(x){return x.id===id});var s=["Pending","Dispatched","Delivered"];put(Object.assign({},o,{dstat:s[Math.min(2,s.indexOf(o.dstat)+1)]}))}
+function pay(id){var o=D.find(function(x){return x.id===id});put(Object.assign({},o,{paid:tot(o)}))}
+function draw(){drawP();
+var q=$("q").value.toLowerCase(),t=$("ft1").value,s=$("ft2").value;
+var L=D.filter(function(o){
+if(q&&(o.name+" "+o.phone).toLowerCase().indexOf(q)<0)return false;
+if(t&&o.type!==t)return false;
+if(s==="due")return tot(o)-o.paid>0;
+if(s&&o.dstat!==s)return false;return true});
+var sales=0,due=0,pend=0;D.forEach(function(o){sales+=tot(o);due+=Math.max(0,tot(o)-o.paid);if(o.dstat!=="Delivered")pend++});
+$("s1").textContent=inr(sales);$("s2").textContent=inr(due);$("s3").textContent=pend;$("s4").textContent=D.length;
+$("list").innerHTML=L.length?L.map(function(o){var d=Math.max(0,tot(o)-o.paid);
+return '<div class="o"><div class="r"><div><b>'+esc(o.name)+'</b> <span class="tag">'+o.type+'</span> <span class="tag">'+(o.btype==="gst"?"GST "+(+o.grate||0)+"%":"Non-GST")+'</span><div class="m">'+esc(o.phone)+(o.addr?" · "+esc(o.addr):"")+" · "+o.date+(o.invno?" · "+esc(o.invno):"")+'</div></div><div style="text-align:right"><b>'+inr(tot(o))+'</b><div class="m">'+o.qty+" × "+esc(o.prod)+'</div></div></div>'
++'<div class="m" style="margin-top:4px"><span class="tag '+(o.dstat==="Delivered"?"d":"p")+'">'+o.dstat+'</span> <span class="tag '+(d?"u":"d")+'">'+(d?"Due "+inr(d):"Paid")+'</span></div>'
++(o.note?'<div class="m">'+esc(o.note)+'</div>':"")
++'<div class="acts">'+(o.dstat!=="Delivered"?'<button class="alt" onclick="nxt('+o.id+')">Next status</button>':"")+(d?'<button class="alt" onclick="pay('+o.id+')">Mark paid</button>':"")+'<button class="alt" onclick="inv('+o.id+')">Invoice PDF</button>'+(d?'<button class="alt" onclick="rem('+o.id+')">WhatsApp reminder</button>':"")+'<button class="alt" onclick="edit('+o.id+')">Edit</button><button class="alt fo" onclick="del('+o.id+')">Delete</button></div></div>'}).join(""):'<div class="empty">No orders yet. Add your first order above.</div>'}
+["q","ft1","ft2"].forEach(function(i){$(i).oninput=draw});
+$("csv").onclick=function(){
+var h=["Date","Type","Name","Phone","Address","Product","Qty","Price","Bill type","Invoice no","Buyer GSTIN","HSN","GST rate","Taxable value","CGST","SGST","IGST","Total","Paid","Delivery","Notes"];
+var r=D.map(function(o){var c=calc(o);return[o.date,o.type,o.name,o.phone,o.addr,o.prod,o.qty,o.price,o.btype==="gst"?"GST":"Non-GST",o.invno||"",o.gstin||"",o.btype==="gst"?(o.hsn||""):"",o.btype==="gst"?(+o.grate||0):"",c.taxable,c.cgst,c.sgst,c.igst,c.grand,o.paid,o.dstat,o.note].map(function(v){return'"'+String(v==null?"":v).replace(/"/g,'""')+'"'}).join(",")});
+save("cleanmax-orders.csv",[h.join(",")].concat(r).join("\n"))};
+var OWN="918884469933";
+function save(n,d){var b=new Blob([d],{type:/pdf$/.test(n)?"application/pdf":"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();a.remove()}
+function wa(num,txt){var a=document.createElement("a");a.href="https://wa.me/"+num+"?text="+encodeURIComponent(txt);a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()}
+function ph(p){var n=String(p||"").replace(/\D/g,"");return n.length===10?"91"+n:n}
+function rem(id){var o=D.find(function(x){return x.id===id});
+wa(ph(o.phone),"Hello "+o.name+",\nThis is a payment reminder from CleanMax (F&S Industries).\nOrder: "+o.qty+" x "+o.prod+" dated "+o.date+"\nTotal: "+inr(tot(o))+"\nPaid: "+inr(o.paid)+"\nBalance due: "+inr(tot(o)-o.paid)+"\nPlease clear the balance soon. Thank you!")}
+$("mon").value=new Date().toISOString().slice(0,7);
+var RT="";
+function rep(){var m=$("mon").value,L=D.filter(function(o){return o.date.slice(0,7)===m});
+var s=0,p=0,T={},P={};L.forEach(function(o){s+=tot(o);p+=Math.min(o.paid,tot(o));T[o.type]=(T[o.type]||0)+tot(o);P[o.prod]=(P[o.prod]||0)+o.qty});
+RT="CleanMax sales report - "+m+"\nOrders: "+L.length+"\nSales: "+inr(s)+"\nReceived: "+inr(p)+"\nPayment due: "+inr(s-p)+"\n\nBy customer type:\n"+(Object.keys(T).map(function(k){return k+": "+inr(T[k])}).join("\n")||"-")+"\n\nUnits sold:\n"+(Object.keys(P).map(function(k){return k+": "+P[k]}).join("\n")||"-");
+var gb=L.filter(function(o){return o.btype==="gst"});
+if(gb.length){var tv=0,cg=0,sg=0,ig=0;gb.forEach(function(o){var c=calc(o);tv+=c.taxable;cg+=c.cgst;sg+=c.sgst;ig+=c.igst});
+RT+="\n\nGST bills: "+gb.length+"\nTaxable value: "+inr2(tv)+"\nCGST: "+inr2(cg)+"\nSGST: "+inr2(sg)+"\nIGST: "+inr2(ig)+"\nTotal GST: "+inr2(cg+sg+ig)}
+$("rout").textContent=RT}
+$("rbtn").onclick=rep;$("mon").oninput=rep;$("rwa").onclick=function(){rep();wa(OWN,RT)};
+rep();
+
+var UID="",UNAME="",UL=[],DS=[],DK=[],fst=false,SH={};
+function fmt(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function tdy(){return fmt(new Date())}
+function szs(b,z){var bv=$(b).value,c=$(z).value;$(z).innerHTML=PR.filter(function(p){return bs(p).base===bv}).map(function(p){return'<option value="'+esc(p.name)+'">'+esc(bs(p).size||"Standard")+'</option>'}).join("");if(c&&PR.some(function(p){return p.name===c&&bs(p).base===bv}))$(z).value=c}
+function fillPS(b,z){var cb=$(b).value,B=[];PR.forEach(function(p){var x=bs(p).base;if(B.indexOf(x)<0)B.push(x)});$(b).innerHTML=B.map(function(x){return"<option>"+esc(x)+"</option>"}).join("");if(cb&&B.indexOf(cb)>=0)$(b).value=cb;szs(b,z)}
+function lf(did,n){var k=0;DK.forEach(function(x){if(x.did===did&&x.prod===n)k+=x.qty});DS.forEach(function(x){if(x.did===did&&x.prod===n)k-=x.qty});return k}
+function stkRows(did){var N=[];DK.concat(DS).forEach(function(x){if(x.did===did&&N.indexOf(x.prod)<0)N.push(x.prod)});
+return N.map(function(n){var g=0,s=0;DK.forEach(function(x){if(x.did===did&&x.prod===n)g+=x.qty});DS.forEach(function(x){if(x.did===did&&x.prod===n)s+=x.qty});return{n:n,g:g,s:s,k:g-s}})}
+function stRow(r){return'<div class="pl"><div><b>'+esc(r.n)+'</b><div class="m">Received '+r.g+' · Sold '+r.s+'</div></div><div style="text-align:right"><b>'+r.k+'</b><div><span class="tag '+(r.k<=10?"u":"d")+'">'+(r.k<=0?"Out of stock":r.k<=10?"Low stock":"In stock")+'</span></div></div></div>'}
+function dleft(){var p=$("sp").value;$("sleft").textContent=p?"Your stock left: "+lf(UID,p)+" units":""}
+function dsDraw(){var L=DS.slice().sort(function(a,b){return b.at-a.at}),t=tdy(),w=new Date();w.setDate(w.getDate()-6);var ws=fmt(w),a=0,b=0,c=0;
+DS.forEach(function(x){var d=String(x.date||"");if(d===t)a+=x.qty;if(d>=ws&&d<=t)b+=x.qty;if(d.slice(0,7)===t.slice(0,7))c+=x.qty});
+$("ya").textContent=a;$("yb").textContent=b;$("yc").textContent=c;
+$("sl").innerHTML=L.length?L.map(function(x){return'<div class="o"><div class="r"><div><b>'+esc(x.shop)+'</b><div class="m">'+esc(x.date)+(x.note?" · "+esc(x.note):"")+'</div></div><div style="text-align:right"><b>'+x.qty+' units</b><div class="m">'+esc(x.prod)+'</div></div></div></div>'}).join(""):'<div class="empty">No sales yet. Tap "Add sale" to enter your first sale.</div>';
+var R=stkRows(UID);$("kl").innerHTML=R.length?R.map(stRow).join(""):'<div class="empty">No stock received yet. It appears here after the founder gives you stock.</div>';dleft()}
+function dsd(id){if(confirm("Delete this sale entry?"))DB.collection("dsales").doc(id).delete().catch(fail)}
+function dsh(id){SH[id]=!SH[id];drawDM()}
+function drawDM(){var Ds=UL.filter(function(u){return u.role==="distributor"}),cur=$("gd").value;
+$("gd").innerHTML=Ds.map(function(u){return'<option value="'+esc(u._id)+'">'+esc(u.name)+'</option>'}).join("");if(cur)$("gd").value=cur;
+var all=0,mon=0,held=0,m=tdy().slice(0,7);
+var R=Ds.map(function(u){var s=0;DS.forEach(function(x){if(x.did===u._id){s+=x.qty;if(String(x.date||"").slice(0,7)===m)mon+=x.qty}});DK.forEach(function(x){if(x.did===u._id)held+=x.qty});all+=s;return{u:u,s:s}});
+held-=all;R.sort(function(a,b){return b.s-a.s});
+$("dsum").innerHTML='<div class="stats"><div class="st"><small>Units sold (all time)</small><b>'+all+'</b></div><div class="st"><small>Units sold this month</small><b>'+mon+'</b></div><div class="st"><small>Stock with distributors</small><b>'+held+'</b></div><div class="st"><small>Distributors</small><b>'+Ds.length+'</b></div></div>';
+$("dlist").innerHTML=R.length?R.map(function(r,i){var u=r.u,rows=stkRows(u._id),L=DS.filter(function(x){return x.did===u._id}).sort(function(a,b){return b.at-a.at}),open=SH[u._id],V=open?L:L.slice(0,5),det=[u.phone,u.area,u.gst?"GST "+u.gst:""].filter(Boolean).map(esc).join(" · ");
+return'<div class="o"><div class="r"><div><b>#'+(i+1)+' '+esc(u.name)+'</b><div class="m">'+(det||"No details added")+'</div></div><div style="text-align:right"><b>'+r.s+' units</b><div class="m">sold</div></div></div>'
++(rows.length?'<div style="margin-top:6px">'+rows.map(stRow).join("")+'</div>':'<div class="m" style="margin-top:6px">No stock given yet.</div>')
++(L.length?'<div class="m" style="margin-top:8px"><b>'+(open?"All sales":"Recent sales")+'</b></div>'+V.map(function(x){return'<div class="pl"><div><b>'+esc(x.shop)+'</b><div class="m">'+esc(x.date)+' · '+esc(x.prod)+(x.note?' · '+esc(x.note):'')+'</div></div><div style="text-align:right"><b>'+x.qty+'</b> <button class="alt" onclick="dsd(\''+esc(x.id)+'\')">Delete</button></div></div>'}).join("")+(L.length>5?'<div class="acts"><button class="alt" onclick="dsh(\''+esc(u._id)+'\')">'+(open?"Show recent only":"Show all "+L.length+" sales")+'</button></div>':""):"")
++'</div>'}).join(""):'<div class="empty">No distributors yet. Add one in the Team tab and choose the role Distributor.</div>'}
+$("sd").value=tdy();
+$("sb").onchange=function(){szs("sb","sp");dleft()};$("sp").onchange=dleft;$("gb").onchange=function(){szs("gb","gs")};
+$("sbtn").onclick=function(){var n=$("sn").value.trim(),q=+$("sq").value||0,p=$("sp").value;
+if(!n){alert("Enter the shop or customer name.");return}
+if(!p){alert("Choose a product and size.");return}
+if(q<1){alert("Quantity must be at least 1.");return}
+var k=lf(UID,p);if(q>k&&!confirm("Only "+k+" in your stock for "+p+". Save this sale anyway?"))return;
+var r=DB.collection("dsales").doc();
+r.set({id:r.id,did:UID,dname:UNAME,date:$("sd").value||tdy(),shop:n,prod:p,qty:q,note:$("sno").value.trim(),at:Date.now()}).catch(fail);
+$("sn").value="";$("sq").value=1;$("sno").value="";$("sd").value=tdy();go("dl")};
+$("gbtn").onclick=function(){var d=$("gd").value,p=$("gs").value,q=+$("gq").value;
+if(!d){alert("Add a distributor in the Team tab first.");return}
+if(!p){alert("Choose a product and size.");return}
+if(!q){alert("Enter the quantity.");return}
+var u=UL.find(function(x){return x._id===d}),r=DB.collection("dstock").doc();
+r.set({id:r.id,did:d,dname:u?u.name:"",prod:p,qty:q,date:tdy(),at:Date.now()}).catch(fail);$("gq").value=""};
+function fstart(){if(fst)return;fst=true;
+DB.collection("dsales").onSnapshot(function(sn){DS=sn.docs.map(function(d){return d.data()});drawDM()},function(){});
+DB.collection("dstock").onSnapshot(function(sn){DK=sn.docs.map(function(d){return d.data()});drawDM()},function(){})}
+function dstart(u,d){UID=u.uid;UNAME=d.name;
+var er=function(){$("sync").textContent="Could not load your data. Check your internet and reload."};
+DB.collection("products").onSnapshot(function(sn){PR=sn.docs.map(function(x){return x.data()}).sort(function(a,b){return a.created-b.created});fillPS("sb","sp");dleft()},er);
+DB.collection("dsales").where("did","==",UID).onSnapshot(function(sn){DS=sn.docs.map(function(x){return x.data()});dsDraw()},er);
+DB.collection("dstock").where("did","==",UID).onSnapshot(function(sn){DK=sn.docs.map(function(x){return x.data()});dsDraw()},er)}
+
+function rd2(x){return Math.round((x+Number.EPSILON)*100)/100}
+function inr2(n){return"₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function calc(o){var q=+o.qty||0,pr=+o.price||0;
+if(o.btype!=="gst"){var g=q*pr;return{gst:false,taxable:g,cgst:0,sgst:0,igst:0,tax:0,round:0,grand:g,rate:0,intra:true}}
+var r=(+o.grate||0)/100,intra=(o.pst||CO.st)===CO.st,tx;
+if(o.gincl==="incl")tx=rd2(rd2(q*pr)/(1+r));else tx=rd2(q*pr);
+var cg=0,sg=0,ig=0;if(intra){cg=rd2(tx*r/2);sg=cg}else ig=rd2(tx*r);
+var tax=rd2(cg+sg+ig),raw=rd2(tx+tax),grand=Math.round(raw);
+return{gst:true,taxable:tx,cgst:cg,sgst:sg,igst:ig,tax:tax,round:rd2(grand-raw),grand:grand,rate:+o.grate||0,intra:intra}}
+function words(n){var a=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"],b=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+function two(x){return x<20?a[x]:b[Math.floor(x/10)]+(x%10?" "+a[x%10]:"")}
+function three(x){var h=Math.floor(x/100),r=x%100;return(h?a[h]+" Hundred"+(r?" ":""):"")+(r?two(r):"")}
+if(n===0)return"Zero";var p=[],cr=Math.floor(n/1e7);n%=1e7;var lk=Math.floor(n/1e5);n%=1e5;var th=Math.floor(n/1e3);n%=1e3;
+if(cr)p.push(three(cr)+" Crore");if(lk)p.push(two(lk)+" Lakh");if(th)p.push(two(th)+" Thousand");if(n)p.push(three(n));return p.join(" ")}
+function rupWords(v){v=rd2(v);var r=Math.floor(v+1e-9),ps=Math.round((v-r)*100);return"Indian Rupees "+words(r)+(ps?" and "+words(ps)+" Paise":"")+" Only"}
+function dmy(s){var p=String(s||"").split("-");return p.length===3?p[2]+"-"+p[1]+"-"+p[0]:(s||"")}
+function stn(c){var x=ST.find(function(y){return y[0]===c});return x?x[1]+" ("+c+")":(c||"")}
+function DV(){return{btype:"nongst",grate:String(DG),gincl:"excl",hsn:DHSN,gstin:"",pst:CO.st}}
+function tgl(){$("gbox").hidden=$("btype").value!=="gst"}
+function curO(){var o={};F.forEach(function(f){o[f]=$(f).value});o.qty=+o.qty||0;o.price=+o.price||0;o.grate=+o.grate||0;return o}
+function gprev(){var o=curO();if(o.btype!=="gst"){$("gprev").textContent="";return}var c=calc(o);
+$("gprev").textContent="Taxable "+inr2(c.taxable)+(c.intra?" · CGST "+inr2(c.cgst)+" · SGST "+inr2(c.sgst):" · IGST "+inr2(c.igst))+(c.round?" · Round off "+inr2(c.round):"")+" · Bill total "+inr2(c.grand)}
+function gdef(){var v=DV();["btype","grate","gincl","hsn","gstin","pst"].forEach(function(f){$(f).value=v[f]});
+var p=PR.find(function(x){return x.name===$("prod").value});if(p){$("hsn").value=p.hsn||DHSN;$("grate").value=String(p.gst!==undefined?p.gst:DG)}tgl();gprev()}
+["pst","cs"].forEach(function(i){$(i).innerHTML=ST.map(function(x){return'<option value="'+x[0]+'">'+x[0]+' - '+esc(x[1])+'</option>'}).join("")});
+$("btype").addEventListener("change",function(){tgl();gprev()});
+["grate","gincl","pst","qty","price"].forEach(function(i){$(i).addEventListener("input",gprev);$(i).addEventListener("change",gprev)});
+$("gstin").addEventListener("input",function(){var v=this.value.trim().toUpperCase();if(v.length>=2&&ST.some(function(x){return x[0]===v.slice(0,2)}))$("pst").value=v.slice(0,2);gprev()});
+gdef();
+function cfill(){["cn:name","ca:addr","cg:gstin","cp:phone","ce:email","cb:bank","cac:acno","ci:ifsc","cbr:branch","ct:terms"].forEach(function(z){var k=z.split(":");$(k[0]).value=CO[k[1]]||""});$("cs").value=CO.st}
+function cstart(){DB.doc("meta/company").onSnapshot(function(sn){if(sn.exists)Object.assign(CO,sn.data());if(!$("cbox").contains(document.activeElement))cfill();gprev()},function(){})}
+$("cbtn").onclick=function(){var g=$("cg").value.trim().toUpperCase();
+if(g&&!GSTRE.test(g)){alert("Your GSTIN looks wrong. It must be 15 characters, for example 29ABCDE1234F1Z5.");return}
+if(g&&g.slice(0,2)!==$("cs").value&&!confirm("The first two digits of your GSTIN ("+g.slice(0,2)+") do not match the state you selected. Save anyway?"))return;
+var c={name:$("cn").value.trim()||"F&S Industries",addr:$("ca").value.trim(),gstin:g,st:$("cs").value,phone:$("cp").value.trim(),email:$("ce").value.trim(),bank:$("cb").value.trim(),acno:$("cac").value.trim(),ifsc:$("ci").value.trim().toUpperCase(),branch:$("cbr").value.trim(),terms:$("ct").value.trim()};
+DB.doc("meta/company").set(c).then(function(){alert("Company details saved.")}).catch(fail)};
+function fyOf(dt){var p=String(dt||tdy()).split("-"),y=+p[0],m=+p[1],a=m>=4?y:y-1;return String(a).slice(2)+"-"+String(a+1).slice(2)}
+function getNo(o,cb){var g=o.btype==="gst",bt=g?"gst":"non";if(o.invno&&o.invbt===bt){cb(o.invno);return}
+var fy=fyOf(o.date),key=(g?"g_":"n_")+fy,pre=g?"CM":"NG";
+function done(n){var no=pre+"/"+fy+"/"+String(n).padStart(4,"0");put(Object.assign({},o,{invno:no,invbt:bt}));cb(no)}
+if(!DB){var k="cm_inv_"+key,n=(+localStorage.getItem(k)||0)+1;try{localStorage.setItem(k,n)}catch(e){}done(n);return}
+var ref=DB.doc("meta/inv");
+DB.runTransaction(function(t){return t.get(ref).then(function(sn){var d=sn.exists?sn.data():{},n=(d[key]||0)+1,u={};u[key]=n;t.set(ref,Object.assign({},d,u));return n})}).then(done).catch(function(){alert("Could not create the invoice number. Check your internet and try again.")})}
+function inv(id){var o=D.find(function(x){return x.id===id});var J=window.jspdf;
+if(!J){alert("PDF tool did not load. Check your internet and try again.");return}
+if(o.btype==="gst"&&!CO.gstin){alert("Your business GSTIN is missing. The founder must add it in Team > Company & invoice details.");return}
+getNo(o,function(no){pdf(o,calc(o),no,J)})}
+function pdf(o,c,no,J){var d=new J.jsPDF({unit:"mm",format:"a4"}),g=c.gst,L=12,R=198,W=186,TL=[10,124,120],IN=[18,48,47],GR=[95,125,124],LN=[190,208,207];
+function tx(s,x,y,sz,b,al,col){d.setFont("helvetica",b?"bold":"normal");d.setFontSize(sz);var k=col||IN;d.setTextColor(k[0],k[1],k[2]);d.text(String(s),x,y,al?{align:al}:undefined)}
+function wr(s,w,sz,b){d.setFont("helvetica",b?"bold":"normal");d.setFontSize(sz);return d.splitTextToSize(String(s||""),w)}
+function pn(n){return Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
+var y=15;tx(CO.name,L,y,17,1,0,TL);y+=5.5;
+wr(CO.addr,105,8.5,0).forEach(function(l){tx(l,L,y,8.5,0,0,GR);y+=4});
+if(g){tx("GSTIN: "+CO.gstin+"    State: "+stn(CO.st),L,y,8.5,1,0,IN);y+=4}
+var ctl=[CO.phone?"Phone: "+CO.phone:"",CO.email?"Email: "+CO.email:""].filter(Boolean).join("   |   ");
+if(ctl){tx(ctl,L,y,8.5,0,0,GR);y+=4}
+tx(g?"TAX INVOICE":"BILL",R,16,17,1,"right",TL);
+if(g)tx("Original for recipient",R,21,8,0,"right",GR);
+var hy=Math.max(y,26)+2;d.setDrawColor(TL[0],TL[1],TL[2]);d.setLineWidth(.7);d.line(L,hy,R,hy);
+var by=hy+4,bl=[{t:"Bill to",s:8,b:0,c:GR}];
+wr(o.name,88,10.5,1).forEach(function(l){bl.push({t:l,s:10.5,b:1,c:IN})});
+if(o.addr)wr(o.addr,88,9,0).slice(0,3).forEach(function(l){bl.push({t:l,s:9,b:0,c:IN})});
+if(o.phone)bl.push({t:"Phone: "+o.phone,s:9,b:0,c:IN});
+if(g){bl.push({t:"GSTIN: "+(o.gstin||"Unregistered / not provided"),s:9,b:0,c:IN});bl.push({t:"State: "+stn(o.pst||CO.st),s:9,b:0,c:IN})}
+var rl=[["Invoice no.",no],["Invoice date",dmy(o.date)]];
+if(g){rl.push(["Place of supply",stn(o.pst||CO.st)]);rl.push(["Reverse charge","No"])}else rl.push(["Order type",o.type]);
+var rr=rl.map(function(r){return{k:r[0],v:wr(r[1],54,9,1)}}),rh=0;rr.forEach(function(r){rh+=r.v.length*4.4+1.8});
+var bh=Math.max(bl.length*4.7+5,rh+5,28);
+d.setDrawColor(LN[0],LN[1],LN[2]);d.setLineWidth(.3);d.rect(L,by,W,bh);d.line(108,by,108,by+bh);
+var ly=by+5.5;bl.forEach(function(r){tx(r.t,L+3,ly,r.s,r.b,0,r.c);ly+=r.b&&r.s>10?5.2:4.7});
+var ry=by+5.5;rr.forEach(function(r){tx(r.k,111,ry,8.5,0,0,GR);r.v.forEach(function(l,j){tx(l,141,ry+j*4.4,9,1,0,IN)});ry+=r.v.length*4.4+1.8});
+var C=g?[["#",8,"c"],["Description",62,"l"],["HSN",18,"c"],["Qty",14,"r"],["Rate (Rs.)",22,"r"],["Taxable (Rs.)",26,"r"],["GST %",14,"r"],["Tax (Rs.)",22,"r"]]:[["#",8,"c"],["Description",90,"l"],["Qty",20,"r"],["Rate (Rs.)",32,"r"],["Amount (Rs.)",36,"r"]];
+var xs=[],ax=L;C.forEach(function(k){xs.push(ax);ax+=k[1]});
+var q=+o.qty||0,rowv=g?[1,o.prod,o.hsn||DHSN,q,pn(c.taxable/(q||1)),pn(c.taxable),c.rate+"%",pn(c.tax)]:[1,o.prod,q,pn(+o.price),pn(q*(+o.price))];
+function ax2(k,i){return k[2]==="c"?xs[i]+k[1]/2:k[2]==="r"?xs[i]+k[1]-2:xs[i]+2}
+function al2(k){return k[2]==="c"?"center":k[2]==="r"?"right":0}
+var ty=by+bh+5;d.setFillColor(TL[0],TL[1],TL[2]);d.rect(L,ty,W,8,"F");
+C.forEach(function(k,i){tx(k[0],ax2(k,i),ty+5.4,8.5,1,al2(k),[255,255,255])});
+var dl=wr(o.prod,C[1][1]-4,9.5,0),bd=Math.max(40,dl.length*4.6+8);
+d.setDrawColor(LN[0],LN[1],LN[2]);d.setLineWidth(.3);d.rect(L,ty+8,W,bd);for(var i=1;i<C.length;i++)d.line(xs[i],ty+8,xs[i],ty+8+bd);
+C.forEach(function(k,i){if(i===1){dl.forEach(function(l,j){tx(l,xs[i]+2,ty+14+j*4.6,9.5,0,0,IN)});return}tx(rowv[i],ax2(k,i),ty+14,9.5,0,al2(k),IN)});
+var sy=ty+8+bd+5,ly2=sy;
+tx("Amount in words",L,ly2,8.5,1,0,GR);ly2+=4.6;
+wr(rupWords(c.grand),98,9.5,1).forEach(function(l){tx(l,L,ly2,9.5,1,0,IN);ly2+=4.6});ly2+=3;
+if(CO.bank||CO.acno||CO.ifsc){tx("Bank details",L,ly2,8.5,1,0,GR);ly2+=4.6;[["Bank",CO.bank],["A/c no.",CO.acno],["IFSC",CO.ifsc],["Branch",CO.branch]].forEach(function(r){if(r[1]){tx(r[0]+": "+r[1],L,ly2,9,0,0,IN);ly2+=4.4}});ly2+=3}
+if(CO.terms){tx("Terms & conditions",L,ly2,8.5,1,0,GR);ly2+=4.6;wr(CO.terms,98,8.5,0).forEach(function(l){tx(l,L,ly2,8.5,0,0,IN);ly2+=4})}
+var rx=116,rw=82,qy=sy,paid=+o.paid||0,bal=Math.max(0,c.grand-paid),hr=+(c.rate/2),SR=[];
+if(g){SR.push(["Taxable value",pn(c.taxable)]);if(c.intra){SR.push(["CGST @ "+hr+"%",pn(c.cgst)]);SR.push(["SGST @ "+hr+"%",pn(c.sgst)])}else SR.push(["IGST @ "+c.rate+"%",pn(c.igst)]);if(c.round)SR.push(["Round off",(c.round>0?"+":"-")+pn(Math.abs(c.round))])}
+SR.forEach(function(r){tx(r[0],rx+3,qy+4.6,9,0,0,IN);tx(r[1],rx+rw-3,qy+4.6,9,0,"right",IN);qy+=6.2});
+d.setFillColor(230,244,243);d.rect(rx,qy,rw,9,"F");tx("Total amount",rx+3,qy+6,10,1,0,TL);tx("Rs. "+pn(c.grand),rx+rw-3,qy+6,10,1,"right",TL);qy+=9;
+tx("Amount paid",rx+3,qy+5,9,0,0,IN);tx("Rs. "+pn(paid),rx+rw-3,qy+5,9,0,"right",IN);qy+=6.2;
+tx("Balance due",rx+3,qy+5,9.5,1,0,IN);tx("Rs. "+pn(bal),rx+rw-3,qy+5,9.5,1,"right",IN);qy+=7;
+d.setDrawColor(LN[0],LN[1],LN[2]);d.setLineWidth(.3);d.rect(rx,sy,rw,qy-sy);
+var gy=Math.max(ly2,qy)+10;gy=Math.max(gy,238);
+if(g)wr("We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",100,8,0).forEach(function(l,j){tx(l,L,gy+j*3.8,8,0,0,GR)});
+tx("For "+CO.name,R,gy,9.5,1,"right",IN);d.setDrawColor(GR[0],GR[1],GR[2]);d.line(R-55,gy+17,R,gy+17);tx("Authorised signatory",R,gy+21,8.5,0,"right",GR);
+tx("Thank you for your business.",105,287,8.5,0,"center",GR);
+save("invoice-"+no.replace(/\//g,"-")+".pdf",d.output("arraybuffer"))}
+function start(db){DB=db;cstart();$("sync").textContent="Synced across your devices";
+db.collection("products").onSnapshot(function(sn){var r=sn.docs.map(function(d){return d.data()});
+if(!r.length&&!seeded){seeded=true;DEF.forEach(pput);var lp=null;try{lp=JSON.parse(localStorage.getItem(K2)||"null")}catch(e){}if(lp&&lp.length)lp.forEach(pput);return}
+PR=r.sort(function(a,b){return a.created-b.created});drawP()},function(){});
+db.collection("orders").onSnapshot(function(sn){var r=sn.docs.map(function(d){return d.data()});
+if(!r.length&&!migrated){migrated=true;var old=[];try{old=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){}
+if(old.length){old.forEach(put);try{localStorage.removeItem(K)}catch(e){}}}
+D=r.sort(function(a,b){return b.id-a.id});draw()},function(){DB=null;$("sync").textContent="Sync unavailable - saving on this device only"})}
+function go(t){document.body.setAttribute("data-t",t);var b=document.querySelectorAll("#nav button");for(var i=0;i<b.length;i++)b[i].classList.toggle("on",b[i].getAttribute("data-t")===t);scrollTo(0,0)}
+document.getElementById("nav").onclick=function(e){var b=e.target.closest("button");if(b)go(b.getAttribute("data-t"))};
+var started=false,teamed=false,creating=false,auth,sec;
+function lock2(m,out){$("app").hidden=true;$("lock").hidden=false;$("lf").hidden=true;$("lmsg").textContent=m;$("lre").hidden=false;$("lre").textContent=out?"Log out":"Reload";$("lre").onclick=function(){if(out)auth.signOut().then(function(){location.reload()});else location.reload()}}
+function team(){var U=[];
+function render(){$("team").innerHTML=U.map(function(u){return'<div class="pl"><span><b>'+esc(u.name)+'</b> <span class="m">'+esc(u.email)+(u.role==="founder"?" · founder":u.role==="distributor"?" · distributor":"")+'</span></span>'+(u.role==="founder"?"":'<span class="acts" style="margin:0"><button class="alt" data-a="rs" data-i="'+u._id+'">Reset password</button>'+(u.role==="distributor"?'<button class="alt" data-a="ed" data-i="'+u._id+'">Edit details</button>':"")+'<button class="alt" data-a="rm" data-i="'+u._id+'">Remove</button></span>')+'</div>'}).join("")}
+DB.collection("users").onSnapshot(function(sn){U=sn.docs.map(function(d){return Object.assign({_id:d.id},d.data())});UL=U;render();drawDM()},function(){});
+$("tbtn").onclick=function(){var n=$("tn").value.trim(),e=$("tu").value.trim().toLowerCase(),pw=$("tp").value;
+if(!n||e.indexOf("@")<1){alert("Enter the name and a valid email.");return}
+if(pw.length<6){alert("Password must be at least 6 characters.");return}
+var rl=$("tr").value,dd={name:n,email:e,role:rl};if(rl==="distributor"){dd.phone=$("td").value.trim();dd.area=$("ta").value.trim();dd.gst=$("tg").value.trim()}
+if(!sec)sec=firebase.initializeApp(firebaseConfig,"sec");
+sec.auth().createUserWithEmailAndPassword(e,pw).then(function(c){var uid=c.user.uid;return sec.auth().signOut().then(function(){return DB.doc("users/"+uid).set(dd)})}).then(function(){$("tn").value="";$("tu").value="";$("tp").value="";$("td").value="";$("ta").value="";$("tg").value=""}).catch(function(er){alert(er.code==="auth/email-already-in-use"?"This email already has an account.":"Could not add login. "+(er.message||""))})};
+$("team").onclick=function(ev){var b=ev.target.closest("button");if(!b)return;var id=b.getAttribute("data-i"),a=b.getAttribute("data-a"),x=U.find(function(y){return y._id===id});if(!x)return;
+if(a==="ed"){var p1=prompt("Phone for "+x.name+":",x.phone||"");if(p1===null)return;var p2=prompt("Area:",x.area||"");if(p2===null)return;var p3=prompt("GST number (optional):",x.gst||"");if(p3===null)return;DB.doc("users/"+id).update({phone:p1.trim(),area:p2.trim(),gst:p3.trim()}).catch(fail);return}
+if(a==="rm"){if(confirm("Remove "+x.name+"? They will lose access."))DB.doc("users/"+id).delete().catch(fail)}
+else auth.sendPasswordResetEmail(x.email).then(function(){alert("Password reset email sent to "+x.email)}).catch(function(){alert("Could not send the email.")})}}
+function enter(d,u){if(d.role==="founder")document.body.classList.add("founder");if(d.role==="distributor")document.body.classList.add("dist");$("lock").hidden=true;$("app").hidden=false;
+if(!started){started=true;if(d.role==="distributor"){dstart(u,d);go("da")}else start(DB)}$("sync").textContent="Logged in: "+d.name;
+if(d.role==="founder"&&!teamed){teamed=true;team();fstart()}
+DB.doc("users/"+u.uid).onSnapshot(function(sn){if(!sn.exists)location.reload()},function(){})}
+function loginForm(setup){$("app").hidden=true;$("lock").hidden=false;$("lre").hidden=true;$("lf").hidden=false;$("lnw").hidden=!setup;$("lfp").hidden=setup;
+$("lbtn").textContent=setup?"Create founder account":"Log in";
+$("lmsg").textContent=setup?"First-time setup: create the founder account.":"Log in with your email and password.";
+var er=$("lerr");
+$("lfp").onclick=function(){var e=$("lu").value.trim();if(!e){er.textContent="Enter your email first.";return}auth.sendPasswordResetEmail(e).then(function(){er.textContent="Reset email sent. Check your inbox."}).catch(function(){er.textContent="Could not send the email."})};
+$("lbtn").onclick=function(){var e=$("lu").value.trim().toLowerCase(),pw=$("lp").value;er.textContent="";
+if(setup){var n=$("ln").value.trim();if(!n||e.indexOf("@")<1){er.textContent="Enter your name and a valid email.";return}if(pw.length<6){er.textContent="Password must be at least 6 characters.";return}
+creating=true;auth.createUserWithEmailAndPassword(e,pw).then(function(c){var d={name:n,email:e,role:"founder"},b=DB.batch();b.set(DB.doc("users/"+c.user.uid),d);b.set(DB.doc("meta/setup"),{at:Date.now()});return b.commit().then(function(){creating=false;enter(d,c.user)})}).catch(function(x){creating=false;er.textContent=x.code==="auth/email-already-in-use"?"This email already has an account.":"Could not create the account. Setup may already be done."});return}
+if(!e||!pw){er.textContent="Enter your email and password.";return}
+auth.signInWithEmailAndPassword(e,pw).catch(function(){er.textContent="Wrong email or password."})}}
+$("lout").onclick=function(){auth.signOut().then(function(){location.reload()})};
+function boot(){
+if(typeof firebase==="undefined"||firebaseConfig.apiKey.indexOf("PASTE")===0){lock2("Setup needed: paste your Firebase settings into index.html (see README.md).");return}
+firebase.initializeApp(firebaseConfig);auth=firebase.auth();DB=firebase.firestore();
+auth.onAuthStateChanged(function(u){if(creating)return;
+if(!u){DB.doc("meta/setup").get().then(function(sn){loginForm(!sn.exists)}).catch(function(){loginForm(false)});return}
+DB.doc("users/"+u.uid).get().then(function(sn){if(sn.exists)enter(sn.data(),u);else lock2("Your account is not approved yet. Ask the founder to add you.",true)}).catch(function(){lock2("Could not check your account. Reload and try again.")})})}
+boot();
+draw();
+</script><script>
+(function(){
+var LG=[["en","English","en-IN"],["hi","हिन्दी","hi-IN"],["kn","ಕನ್ನಡ","kn-IN"],["ml","മലയാളം","ml-IN"],["ta","தமிழ்","ta-IN"]];
+var UI={en:["Tap to speak","Listening…"],hi:["बोलने के लिए टैप करें","सुन रहा हूँ…"],kn:["ಮಾತನಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ","ಕೇಳುತ್ತಿದ್ದೇನೆ…"],ml:["സംസാരിക്കാൻ ടാപ്പ് ചെയ്യുക","കേൾക്കുന്നു…"],ta:["பேச தட்டவும்","கேட்கிறேன்…"]};
+var P={en:["Today","This month"],hi:["आज","इस महीने"],kn:["ಇಂದು","ಈ ತಿಂಗಳು"],ml:["ഇന്ന്","ഈ മാസം"],ta:["இன்று","இந்த மாதம்"]};
+var T={
+en:{fs:function(p,c,a,u){return p+": "+c+" orders, "+a+" rupees. Distributors sold "+u+" units."},ds:function(p,u){return p+": you sold "+u+" units."},pd:function(c,a){return c?"Pending payment: "+a+" rupees from "+c+" orders.":"No pending payments."},st:"Stock: ",nst:"No stock records yet.",tp:function(n,u){return"Top distributor is "+n+" with "+u+" units sold."},ntp:"No distributor sales yet.",nm:function(n,a,m,k){return n+" sold "+a+" units in total, "+m+" this month. Stock left: "+k+"."},na:"You can ask only about your own sales and stock.",un:"Sorry, I did not get that. Ask about today's sales, this month, pending payment, stock, or top distributor."},
+hi:{fs:function(p,c,a,u){return p+": "+c+" ऑर्डर, "+a+" रुपये। डिस्ट्रीब्यूटर ने "+u+" यूनिट बेचे।"},ds:function(p,u){return p+": आपने "+u+" यूनिट बेचे।"},pd:function(c,a){return c?"बकाया पेमेंट: "+c+" ऑर्डर से "+a+" रुपये।":"कोई बकाया पेमेंट नहीं है।"},st:"स्टॉक: ",nst:"अभी कोई स्टॉक नहीं है।",tp:function(n,u){return"सबसे ज़्यादा बिक्री "+n+" की है, "+u+" यूनिट।"},ntp:"अभी कोई डिस्ट्रीब्यूटर बिक्री नहीं है।",nm:function(n,a,m,k){return n+" ने कुल "+a+" यूनिट बेचे, इस महीने "+m+"। बचा स्टॉक "+k+"।"},na:"आप सिर्फ अपनी बिक्री और स्टॉक पूछ सकते हैं।",un:"माफ़ कीजिए, समझ नहीं आया। आज की बिक्री, इस महीने, बकाया पेमेंट, स्टॉक या टॉप डिस्ट्रीब्यूटर पूछें।"},
+kn:{fs:function(p,c,a,u){return p+": "+c+" ಆರ್ಡರ್, "+a+" ರೂಪಾಯಿ. ಡಿಸ್ಟ್ರಿಬ್ಯೂಟರ್‌ಗಳು "+u+" ಯೂನಿಟ್ ಮಾರಾಟ ಮಾಡಿದ್ದಾರೆ."},ds:function(p,u){return p+": ನೀವು "+u+" ಯೂನಿಟ್ ಮಾರಾಟ ಮಾಡಿದ್ದೀರಿ."},pd:function(c,a){return c?"ಬಾಕಿ ಪಾವತಿ: "+c+" ಆರ್ಡರ್‌ಗಳಿಂದ "+a+" ರೂಪಾಯಿ.":"ಯಾವುದೇ ಬಾಕಿ ಪಾವತಿ ಇಲ್ಲ."},st:"ಸ್ಟಾಕ್: ",nst:"ಇನ್ನೂ ಸ್ಟಾಕ್ ಇಲ್ಲ.",tp:function(n,u){return"ಅತಿ ಹೆಚ್ಚು ಮಾರಾಟ "+n+" ಅವರದು, "+u+" ಯೂನಿಟ್."},ntp:"ಇನ್ನೂ ಡಿಸ್ಟ್ರಿಬ್ಯೂಟರ್ ಮಾರಾಟ ಇಲ್ಲ.",nm:function(n,a,m,k){return n+" ಒಟ್ಟು "+a+" ಯೂನಿಟ್ ಮಾರಿದ್ದಾರೆ, ಈ ತಿಂಗಳು "+m+". ಉಳಿದ ಸ್ಟಾಕ್ "+k+"."},na:"ನೀವು ನಿಮ್ಮ ಮಾರಾಟ ಮತ್ತು ಸ್ಟಾಕ್ ಬಗ್ಗೆ ಮಾತ್ರ ಕೇಳಬಹುದು.",un:"ಕ್ಷಮಿಸಿ, ಅರ್ಥವಾಗಲಿಲ್ಲ. ಇಂದಿನ ಮಾರಾಟ, ಈ ತಿಂಗಳು, ಬಾಕಿ ಪಾವತಿ, ಸ್ಟಾಕ್ ಅಥವಾ ಟಾಪ್ ಡಿಸ್ಟ್ರಿಬ್ಯೂಟರ್ ಬಗ್ಗೆ ಕೇಳಿ."},
+ml:{fs:function(p,c,a,u){return p+": "+c+" ഓർഡർ, "+a+" രൂപ. ഡിസ്ട്രിബ്യൂട്ടർമാർ "+u+" യൂണിറ്റ് വിറ്റു."},ds:function(p,u){return p+": നിങ്ങൾ "+u+" യൂണിറ്റ് വിറ്റു."},pd:function(c,a){return c?"ബാക്കി പണം: "+c+" ഓർഡറുകളിൽ നിന്ന് "+a+" രൂപ.":"ബാക്കി പണം ഇല്ല."},st:"സ്റ്റോക്ക്: ",nst:"സ്റ്റോക്ക് ഇല്ല.",tp:function(n,u){return"ഏറ്റവും കൂടുതൽ വിൽപ്പന "+n+", "+u+" യൂണിറ്റ്."},ntp:"ഇതുവരെ വിൽപ്പന ഇല്ല.",nm:function(n,a,m,k){return n+" ആകെ "+a+" യൂണിറ്റ് വിറ്റു, ഈ മാസം "+m+". ബാക്കി സ്റ്റോക്ക് "+k+"."},na:"നിങ്ങളുടെ വിൽപ്പനയെയും സ്റ്റോക്കിനെയും കുറിച്ച് മാത്രം ചോദിക്കാം.",un:"ക്ഷമിക്കണം, മനസ്സിലായില്ല. ഇന്നത്തെ വിൽപ്പന, ഈ മാസം, ബാക്കി പണം, സ്റ്റോക്ക്, ടോപ് ഡിസ്ട്രിബ്യൂട്ടർ എന്നിവ ചോദിക്കൂ."},
+ta:{fs:function(p,c,a,u){return p+": "+c+" ஆர்டர், "+a+" ரூபாய். விநியோகஸ்தர்கள் "+u+" யூனிட் விற்றனர்."},ds:function(p,u){return p+": நீங்கள் "+u+" யூனிட் விற்றீர்கள்."},pd:function(c,a){return c?"நிலுவைத் தொகை: "+c+" ஆர்டர்களில் "+a+" ரூபாய்.":"நிலுவைத் தொகை எதுவும் இல்லை."},st:"ஸ்டாக்: ",nst:"ஸ்டாக் இல்லை.",tp:function(n,u){return"அதிக விற்பனை "+n+", "+u+" யூனிட்."},ntp:"இன்னும் விற்பனை இல்லை.",nm:function(n,a,m,k){return n+" மொத்தம் "+a+" யூனிட் விற்றார், இந்த மாதம் "+m+". மீதி ஸ்டாக் "+k+"."},na:"உங்கள் விற்பனை மற்றும் ஸ்டாக் பற்றி மட்டுமே கேட்கலாம்.",un:"மன்னிக்கவும், புரியவில்லை. இன்றைய விற்பனை, இந்த மாதம், நிலுவை, ஸ்டாக் அல்லது டாப் விநியோகஸ்தர் பற்றி கேளுங்கள்."}};
+var W={stock:/stock|stok|स्टॉक|ಸ್ಟಾಕ್|സ്റ്റോക്ക്|ஸ்டாக்|ஸ்டோக்/,pay:/pending|payment|due|balance|outstanding|paisa|paise|पेमेंट|पैसे|पैसा|बकाया|ಬಾಕಿ ಪಾವತಿ|ಪಾವತಿ|ಹಣ|പണം|பணம்|நிலுவை|பாக்கி/,top:/\btop\b|best|most|rank|highest|sabse|सबसे|टॉप|ಹೆಚ್ಚು|ಟಾಪ್|ഏറ്റവും|ടോപ്|அதிக|டாப்/,month:/month|mahina|mahine|महीन|ತಿಂಗಳ|മാസ|மாத/,sale:/sale|sell|sold|order|bikri|बिक्री|बिका|बेच|ऑर्डर|ಮಾರಾಟ|ಆರ್ಡರ್|വിൽപ്പന|വിറ്റ|ഓർഡർ|விற்பனை|விற்|ஆர்டர்/,today:/today|aaj|आज|ಇಂದು|ഇന്ന|இன்று|இன்றைய/};
+var lang=localStorage.getItem("vlang")||"en",rec=null,busy=false,$=function(i){return document.getElementById(i)},ov=$("vov");
+function g(n){try{return eval(n)}catch(e){return[]}}
+function num(n){return Math.round(n).toLocaleString("en-IN")}
+function isDist(){return document.body.classList.contains("dist")}
+function answer(q){var t=T[lang],s=q.toLowerCase(),td=tdy(),m=td.slice(0,7),D=g("D"),PR=g("PR"),DS=g("DS"),DK=g("DK"),UL=g("UL"),UID=g("UID");
+if(isDist()){
+ if(W.stock.test(s)){var R=stkRows(UID);return R.length?t.st+R.map(function(r){return r.n+" "+r.k}).join(", ")+".":t.nst}
+ if(W.pay.test(s)||W.top.test(s))return t.na;
+ if(W.sale.test(s)||W.month.test(s)||W.today.test(s)){var mo=W.month.test(s),u=0;DS.forEach(function(x){var d=String(x.date||"");if(mo?d.slice(0,7)===m:d===td)u+=x.qty});return t.ds(P[lang][mo?1:0],u)}
+ return t.un}
+var Ds=UL.filter(function(u){return u.role==="distributor"});
+for(var i=0;i<Ds.length;i++){var nn=String(Ds[i].name||"").toLowerCase();if(nn&&s.indexOf(nn.split(" ")[0])>=0){var id=Ds[i]._id,a=0,mm=0,k=0;DS.forEach(function(x){if(x.did===id){a+=x.qty;if(String(x.date||"").slice(0,7)===m)mm+=x.qty}});DK.forEach(function(x){if(x.did===id)k+=x.qty});return t.nm(Ds[i].name,a,mm,k-a)}}
+if(W.stock.test(s)&&!W.pay.test(s)){var L=PR.map(function(p){return p.name+" "+stock(p.name)});return L.length?t.st+L.join(", ")+".":t.nst}
+if(W.pay.test(s)){var c=0,a2=0;D.forEach(function(o){var b=tot(o)-(+o.paid||0);if(b>0.5){c++;a2+=b}});return t.pd(c,num(a2))}
+if(W.top.test(s)){var best=null,bu=0;Ds.forEach(function(u){var x=0;DS.forEach(function(y){if(y.did===u._id)x+=y.qty});if(x>bu){bu=x;best=u}});return best?t.tp(best.name,bu):t.ntp}
+if(W.sale.test(s)||W.month.test(s)||W.today.test(s)){var mo2=W.month.test(s),oc=0,am=0,du=0;D.forEach(function(o){var d=String(o.date||"");if(mo2?d.slice(0,7)===m:d===td){oc++;am+=tot(o)}});DS.forEach(function(x){var d=String(x.date||"");if(mo2?d.slice(0,7)===m:d===td)du+=x.qty});return t.fs(P[lang][mo2?1:0],oc,num(am),du)}
+return t.un}
+function setS(c,txt){ov.className=c;$("vst").textContent=txt||""}
+function speak(txt){if(!window.speechSynthesis){setS("","");return}
+speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(txt),code=LG.filter(function(l){return l[0]===lang})[0][2];u.lang=code;
+var v=speechSynthesis.getVoices().filter(function(x){return x.lang.replace("_","-").toLowerCase().indexOf(lang)===0})[0];if(v)u.voice=v;
+u.rate=.95;u.onstart=function(){setS("s","")};u.onend=u.onerror=function(){setS("",UI[lang][0])};speechSynthesis.speak(u)}
+function listen(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){$("vans").textContent="Voice input is not supported in this browser. Open the app in Chrome.";return}
+if(window.speechSynthesis)speechSynthesis.cancel();if(rec){try{rec.abort()}catch(e){}}
+rec=new SR();rec.lang=LG.filter(function(l){return l[0]===lang})[0][2];rec.interimResults=true;rec.maxAlternatives=1;var fin="";
+$("vsay").textContent="";$("vans").textContent="";
+rec.onstart=function(){setS("l",UI[lang][1])};
+rec.onresult=function(e){var t="";for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;fin=t;$("vsay").textContent=t};
+rec.onerror=function(e){setS("",UI[lang][0]);$("vans").textContent=e.error==="not-allowed"||e.error==="service-not-allowed"?"Allow microphone permission for this site, then tap again.":e.error==="no-speech"?"":"Could not hear you. Check your internet and try again."};
+rec.onend=function(){if(ov.className==="l"){setS("",UI[lang][0]);if(fin){var a=answer(fin);$("vans").textContent=a;speak(a)}}};
+try{rec.start()}catch(e){}}
+function chips(){$("vlg").innerHTML=LG.map(function(l){return'<button data-l="'+l[0]+'" class="'+(l[0]===lang?"on":"")+'">'+l[1]+'</button>'}).join("")}
+$("vlg").onclick=function(e){var b=e.target.closest("button");if(!b)return;lang=b.getAttribute("data-l");try{localStorage.setItem("vlang",lang)}catch(x){}chips();setS("",UI[lang][0]);$("vsay").textContent="";$("vans").textContent="";if(window.speechSynthesis)speechSynthesis.cancel()};
+$("vstage").onclick=listen;
+$("vfab").onclick=function(){ov.hidden=false;chips();setS("",UI[lang][0]);listen()};
+$("vx").onclick=function(){try{if(rec)rec.abort()}catch(e){}if(window.speechSynthesis)speechSynthesis.cancel();ov.hidden=true;ov.className=""};
+if(window.speechSynthesis)speechSynthesis.getVoices();
+})();
+</script>
+</body></html>
